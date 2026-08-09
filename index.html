@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nexus — تطبيق الدردشة الشامل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="nodes"></canvas>
+
+<!-- شاشة تسجيل الدخول وإنشاء الحساب -->
+<div id="authModal" class="modal-overlay">
+  <div class="card">
+    <div class="brand-mark">N</div>
+    <h1>مرحباً بك في Nexus</h1>
+    <p>أنشئ حسابك الخاص بيوزرنيم فريد ولا تضيع محادثاتك أبداً</p>
+    
+    <div id="stepEmail" class="auth-step">
+      <input id="emailInput" type="email" placeholder="البريد الإلكتروني..." autocomplete="off">
+      <button id="sendOtpBtn">إرسال رمز التحقق</button>
+    </div>
+
+    <div id="stepOtp" class="auth-step hidden">
+      <p id="otpInfoText" style="font-size:12px; color:var(--accent); margin-bottom:10px;"></p>
+      <input id="otpInput" type="text" maxlength="6" placeholder="أدخل رمز التحقق (6 أرقام)..." autocomplete="off" style="letter-spacing:4px; text-align:center;">
+      <button id="verifyOtpBtn">تأكيد الرمز</button>
+    </div>
+
+    <div id="stepProfile" class="auth-step hidden">
+      <div class="avatar-picker">
+        <label for="avatarInput" class="avatar-label" id="avatarPreviewLabel">اختر صورة</label>
+        <input type="file" id="avatarInput" accept="image/*" class="hidden">
+      </div>
+      <input id="usernameInput" maxlength="15" placeholder="يوزرنيم فريد (بالإنجليزية)..." autocomplete="off">
+      <input id="displayNameInput" maxlength="20" placeholder="اسمك الظاهر..." autocomplete="off">
+      <button id="completeRegisterBtn">إتمام إنشاء الحساب</button>
+    </div>
+  </div>
+</div>
+
+<!-- زر المطور المنبثق -->
+<button id="developerBtn" class="developer-float-btn">المطور</button>
+
+<div id="developerModal" class="modal-overlay hidden">
+  <div class="card">
+    <div class="brand-mark">L</div>
+    <h1>عن المطور</h1>
+    <p style="line-height: 1.8; text-align: right;">
+      السلام عليكم ورحمه الله وبركاته انا <b>𝐿𝑜𝑟𝑑</b> مطور برمجي خبير في بناء التطبيقات و المواقع و الي اخيره حابب تتعرف عليا اضغط على زر التواصل كي يدخلك الي حسابي في تلجرام
+    </p>
+    <a href="https://t.me/F7_o9" target="_blank" class="tg-btn">تواصل مع المطور (F7_o9)</a>
+    <button id="closeDevModal" class="secondary" style="margin-top:10px;">إغلاق</button>
+  </div>
+</div>
+
+<!-- واجهة التطبيق الرئيسية (شبه واتساب) -->
+<div id="appContainer" class="app-layout hidden">
+  <!-- الشريط الجانبي / القائمة الرئيسية -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="my-profile-info" id="myProfileInfo">
+        <div class="avatar-sm" id="mySidebarAvatar">N</div>
+        <div>
+          <h4 id="mySidebarName">اسم المستخدم</h4>
+          <span id="mySidebarUsername" style="font-size:11px; color:var(--muted);">@username</span>
+        </div>
+      </div>
+      <div class="sidebar-actions">
+        <button id="openNewGroupBtn" title="إنشاء قروب">👥</button>
+      </div>
+    </div>
+
+    <div class="search-box-container">
+      <input id="globalSearchInput" placeholder="بحث بيوزرنيم شخص آخر لإضافة صديق..." autocomplete="off">
+    </div>
+
+    <div class="chats-list" id="chatsList">
+      <!-- محادثتك الخاصة والدردشات الأخرى -->
+    </div>
+  </aside>
+
+  <!-- نافذة الدردشة النشطة -->
+  <section id="chatSection">
+    <header class="chat-header">
+      <button id="backToSidebar" class="back-btn hidden">←</button>
+      <div class="chat-target-info">
+        <div class="avatar-sm" id="activeChatAvatar">N</div>
+        <div>
+          <h3 id="activeChatTitle">اختر محادثة</h3>
+          <span id="activeChatStatus" style="font-size:11px; color:var(--muted);">غير متصل</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="messages">
+      <div class="empty"><b>مرحباً بك في Nexus</b>اختر محادثة أو ابحث عن صديق باليوزرنيم للبدء بالدردشة بلا قيود</div>
+    </main>
+
+    <!-- نافذة منبثقة لصنع الستيكرات -->
+    <div id="stickerModal" class="modal-overlay hidden">
+      <div class="card">
+        <h1>صانع الستيكرات</h1>
+        <p>اختر صورة لتحويلها إلى ستيكر وإرسالها فوراً</p>
+        <input type="file" id="stickerFileinput" accept="image/*" style="margin-bottom:12px;">
+        <div id="stickerPreviewArea" style="margin-bottom:12px; max-height:150px; overflow:hidden;"></div>
+        <button id="sendStickerBtn">إرسال الستيكر</button>
+        <button id="closeStickerModal" class="secondary">إلغاء</button>
+      </div>
+    </div>
+
+    <!-- نافذة إنشاء قروب -->
+    <div id="groupModal" class="modal-overlay hidden">
+      <div class="card">
+        <h1>إنشاء مجموعة جديدة</h1>
+        <input id="groupNameInput" placeholder="اسم المجموعة..." autocomplete="off">
+        <button id="createGroupConfirmBtn">إنشاء القروب</button>
+        <button id="closeGroupModal" class="secondary">إلغاء</button>
+      </div>
+    </div>
+
+    <form id="form">
+      <div class="attachments-menu">
+        <button type="button" id="attachMediaBtn" title="إرسال صور أو فيديوهات">📷</button>
+        <button type="button" id="attachFileBtn" title="إرسال ملفات">📁</button>
+        <button type="button" id="recordVoiceBtn" title="تسجيل فويس نوت">🎤</button>
+        <button type="button" id="makeStickerBtn" title="صنع ستيكر">✨</button>
+      </div>
+      <input type="file" id="mediaFileInput" accept="image/*,video/*" class="hidden">
+      <input type="file" id="anyFileInput" class="hidden">
+      
+      <input id="text" placeholder="اكتب رسالة بلا قيود..." autocomplete="off" disabled>
+      <button type="submit" id="sendMsgBtn" disabled>→</button>
+    </form>
+  </section>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
