@@ -4,12 +4,8 @@ const status = document.getElementById('status');
 const resultBox = document.getElementById('result-box');
 const finalLink = document.getElementById('final-link');
 
-// 🔒 قائمة التمديدات المحظورة أمنياً منعاً لرفع ملفات خبيثة
+// 🔒 قائمة الامتدادات المحظورة أمنياً
 const forbiddenExts = ['exe', 'bat', 'cmd', 'sh', 'js', 'php', 'py', 'html'];
-
-// استبدل هذا التوكن برمز توكن شخصي من حسابك على GitHub (Personal Access Token) بصلاحية Gist
-// وميزة هذا التوكن أن الملفات ترفع مباشرة على سحابتك الخاصة ولن تحذف أبداً
-const GITHUB_TOKEN = 'ضع_توكن_جيت_هب_هنا_إذا_أردت_الربط_المباشر'; 
 
 dropZone.addEventListener('dragover', (e) => e.preventDefault());
 dropZone.addEventListener('drop', (e) => {
@@ -28,69 +24,83 @@ fileInput.addEventListener('change', (e) => {
 async function processFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
 
-    // حماية أمنية صارمة
+    // 1. فحص الأمان
     if (forbiddenExts.includes(ext)) {
-        status.style.color = '#f85149';
-        status.innerText = '❌ عذراً، هذا الامتداد محظور لأسباب أمنية شديدة!';
+        showError('❌ عذراً، هذا الامتداد محظور لأسباب أمنية!');
         return;
     }
 
-    // فحص الحجم أقصى حد 25 ميجابايت لضمان عدم حدوث تعليق
-    if (file.size > 25 * 1024 * 1024) {
-        status.style.color = '#f85149';
-        status.innerText = '❌ حجم الملف كبير جداً! الحد الأقصى 25 ميجابايت.';
+    // 2. فحص الحجم (الحد الأقصى 100 ميجابايت)
+    if (file.size > 100 * 1024 * 1024) {
+        showError('❌ حجم الملف كبير جداً! الحد الأقصى 100 ميجابايت.');
         return;
     }
 
+    // إظهار حالة التحميل
     status.style.color = '#58a6ff';
-    status.innerText = '⏳ [Klein] جاري تأمين الملف ورفعـه بشكل دائم...';
+    status.innerText = '⏳ [Klein] جاري تأمين الملف ورفعه برابط دائم...';
     resultBox.classList.add('hidden');
 
     try {
-        // تحويل الملف إلى Base64 أو نص لرفع آمن
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            const base64Content = event.target.result.split(',')[1];
-            const fileName = `klein_${Date.now()}.${ext}`;
+        // رفع الميديا عبر خوادم التخزين الدائم المباشرة
+        const link = await uploadMediaPermanently(file);
 
-            // إذا أردت الرفع الاحترافي الدائم عبر GitHub Gist (بدون أي حذف نهائي)
-            const response = await fetch('https://api.github.com/gists', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    description: "Klein Permanent Media Storage",
-                    public: true,
-                    files: {
-                        [fileName]: {
-                            content: atob(base64Content) // أو رفع البيانات المباشرة
-                        }
-                    }
-                })
-            });
-
-            // بديل آخر موثوق 100% في حال لم تستخدم جيت هب وتريد خادماً لا يحذف الروابط أبداً:
-            // يمكنك توجيه الطلب لخادمك الخاص (Node.js backend) ليحفظه محلياً أو على سحابتك الخاصة.
-            
-            const data = await response.json();
-            if (data && data.files) {
-                const rawUrl = Object.values(data.files)[0].raw_url;
-                finalLink.value = rawUrl;
-                status.style.color = '#3fb950';
-                status.innerText = '✅ تم استخراج الرابط الدائم بنجاح تام!';
-                resultBox.classList.remove('hidden');
-            } else {
-                throw new Error('فشل الستوري الدائم');
-            }
-        };
-        reader.readAsDataURL(file);
+        finalLink.value = link;
+        status.style.color = '#3fb950';
+        status.innerText = '✅ تم استخراج الرابط الدائم بنجاح!';
+        resultBox.classList.remove('hidden');
 
     } catch (err) {
-        status.style.color = '#f85149';
-        status.innerText = '❌ حدث خطأ أثناء الاتصال بالسيرفر الآمن.';
+        console.error(err);
+        showError(`❌ حدث خطأ أثناء الرفع: ${err.message || 'فشل الاتصال بالسيرفر'}`);
     }
+}
+
+// ☁️ دالة الرفع على خوادم التخزين الدائم (Catbox / Pomf)
+async function uploadMediaPermanently(file) {
+    // المحاولة الأولى: Catbox Engine (روابط دائمة ولا تحذف أبداً)
+    try {
+        const formData = new FormData();
+        formData.append('reqtype', 'fileupload');
+        formData.append('fileToUpload', file);
+
+        const res = await fetch('https://catbox.moe/user/api.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (res.ok) {
+            const text = await res.text();
+            if (text && text.startsWith('http')) {
+                return text.trim();
+            }
+        }
+    } catch (e) {
+        console.warn('Catbox Engine unavailable, switching to backup server...');
+    }
+
+    // المحاولة الثانية الاحتياطية: Pomf Engine
+    const formDataBackup = new FormData();
+    formDataBackup.append('files[]', file);
+
+    const resBackup = await fetch('https://pomf.lain.la/upload.php', {
+        method: 'POST',
+        body: formDataBackup
+    });
+
+    if (!resBackup.ok) throw new Error('تعذر الاتصال بخوادم الرفع الدائم');
+
+    const json = await resBackup.json();
+    if (json && json.success && json.files && json.files[0]) {
+        return json.files[0].url;
+    }
+
+    throw new Error('لم يتم استلام رابط صحيح من السيرفر');
+}
+
+function showError(msg) {
+    status.style.color = '#f85149';
+    status.innerText = msg;
 }
 
 function copyLink() {
