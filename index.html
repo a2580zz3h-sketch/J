@@ -1,34 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klein | الرفع الآمن الدائم</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>AXRL Media — Voice Player</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h2>🛡️ KLEIN SECURE UPLOAD</h2>
-            <p>نظام الرفع الدائم - روابط لا تنتهي أبدًا</p>
-        </header>
+  <main class="player">
+    <header class="top">
+      <div class="music-icon">♫</div>
+      <div class="info">
+        <div class="brand">AXRL MEDIA</div>
+        <h1 id="title">Voice Player</h1>
+        <span class="badge">ONLINE AUDIO</span>
+      </div>
+    </header>
 
-        <div class="upload-box" id="drop-zone">
-            <input type="file" id="file-input" hidden>
-            <div class="content" onclick="document.getElementById('file-input').click()">
-                <span class="icon">🔒</span>
-                <p>اسحب الملف هنا أو اضغط للاختيار</p>
-                <small>حماية قصوى ضد الحذف أو التوقف</small>
-            </div>
-        </div>
+    <section class="disc-wrap">
+      <div class="disc" id="disc">
+        <div class="disc-center">♫</div>
+      </div>
+    </section>
 
-        <div id="status" class="status-msg"></div>
-
-        <div id="result-box" class="hidden">
-            <input type="text" id="final-link" readonly>
-            <button id="copy-btn" onclick="copyLink()">نسخ الرابط الدائم</button>
-        </div>
+    <div class="wave" id="wave" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
-    <script src="script.js"></script>
+
+    <section class="timeline">
+      <button class="time" id="currentTime">0:00</button>
+      <div class="track" id="track" role="slider" aria-label="تقدم الصوت" tabindex="0">
+        <div class="fill" id="fill"></div>
+      </div>
+      <button class="time" id="duration">0:00</button>
+    </section>
+
+    <section class="controls">
+      <button class="small" id="back" aria-label="رجوع 5 ثوان">↶</button>
+      <button class="play" id="play" aria-label="تشغيل">▶</button>
+      <button class="small" id="forward" aria-label="تقديم 5 ثوان">↷</button>
+    </section>
+
+    <section class="volume">
+      <button class="mute" id="mute" aria-label="كتم الصوت">🔊</button>
+      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="مستوى صوت الأغنية">
+      <span id="volumeValue">80%</span>
+    </section>
+
+    <div class="status" id="status">اضغط ▶ لتشغيل الصوت</div>
+
+    <audio id="audio" preload="metadata" playsinline></audio>
+
+    <footer>AXRL MEDIA • AUDIO PLAYER</footer>
+  </main>
+
+  <script src="player.js"></script>
 </body>
 </html>
