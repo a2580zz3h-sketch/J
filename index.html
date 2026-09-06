@@ -42,18 +42,25 @@
     </div>
   </header>
 
+  <!-- ===== Mobile view switcher (hidden on wide screens) ===== -->
+  <nav class="mobile-tabs" id="mobile-tabs">
+    <button class="mobile-tab" data-view="files">الملفات</button>
+    <button class="mobile-tab active" data-view="editor">المحرر</button>
+    <button class="mobile-tab" data-view="preview">المعاينة</button>
+  </nav>
+
   <!-- ===== Workspace ===== -->
-  <main class="workspace">
+  <main class="workspace" data-mobile-view="editor">
 
     <!-- Files rail -->
-    <aside class="files-pane">
+    <aside class="files-pane" data-pane="files">
       <div class="pane-heading">الملفات</div>
       <ul class="file-list" id="file-list"></ul>
       <button class="add-file-btn" id="add-file-btn">+ ملف جديد</button>
     </aside>
 
     <!-- Editor -->
-    <section class="editor-pane">
+    <section class="editor-pane" data-pane="editor">
       <div class="pane-heading editor-heading">
         <span id="active-file-name">index.html</span>
         <span class="dirty-dot" id="dirty-dot" hidden>●</span>
@@ -62,7 +69,7 @@
     </section>
 
     <!-- Live preview -->
-    <section class="preview-pane">
+    <section class="preview-pane" data-pane="preview">
       <div class="pane-heading preview-heading">
         <span>المعاينة</span>
         <label class="auto-toggle">

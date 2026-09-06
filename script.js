@@ -83,6 +83,22 @@ document.getElementById("go").addEventListener("click", () => {
   const consoleClearBtn = document.getElementById("console-clear");
   const consoleCloseBtn = document.getElementById("console-close");
 
+  const workspaceEl  = document.querySelector(".workspace");
+  const mobileTabsEl = document.getElementById("mobile-tabs");
+  const mobileTabBtns = mobileTabsEl ? [...mobileTabsEl.querySelectorAll(".mobile-tab")] : [];
+
+  function setMobileView(view) {
+    if (!workspaceEl) return;
+    workspaceEl.dataset.mobileView = view;
+    mobileTabBtns.forEach((btn) => btn.classList.toggle("active", btn.dataset.view === view));
+    // CodeMirror needs a refresh once its container becomes visible again.
+    if (view === "editor") setTimeout(() => editor.refresh(), 0);
+  }
+
+  mobileTabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => setMobileView(btn.dataset.view));
+  });
+
   /* ---------------------------------------------------------------
      3. CodeMirror editor
   --------------------------------------------------------------- */
@@ -144,7 +160,10 @@ document.getElementById("go").addEventListener("click", () => {
       });
       li.appendChild(removeBtn);
 
-      li.addEventListener("click", () => openFile(name));
+      li.addEventListener("click", () => {
+        openFile(name);
+        setMobileView("editor");
+      });
       fileListEl.appendChild(li);
     });
     renderEntryOptions();
@@ -207,7 +226,10 @@ document.getElementById("go").addEventListener("click", () => {
 
   addFileBtn.addEventListener("click", () => {
     const name = prompt("اسم الملف الجديد (مثال: about.html):");
-    if (name && name.trim()) addFile(name.trim());
+    if (name && name.trim()) {
+      addFile(name.trim());
+      setMobileView("editor");
+    }
   });
 
   /* ---------------------------------------------------------------
@@ -233,6 +255,7 @@ document.getElementById("go").addEventListener("click", () => {
     }
     logConsole("system", `تم استيراد ${list.length} ملف/ملفات`);
     runPreview();
+    setMobileView("editor");
     uploadInput.value = "";
   });
 
@@ -323,7 +346,10 @@ document.getElementById("go").addEventListener("click", () => {
     return found || null;
   }
 
-  runBtn.addEventListener("click", runPreview);
+  runBtn.addEventListener("click", () => {
+    runPreview();
+    setMobileView("preview");
+  });
 
   /* ---------------------------------------------------------------
      7. Console / "cache" panel
