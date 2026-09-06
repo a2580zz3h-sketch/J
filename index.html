@@ -1,59 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>AXRL Media — Voice Player</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TrebEdit — معاينة وتحرير المواقع</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/neat.min.css">
+
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="player">
-    <header class="top">
-      <div class="music-icon">♫</div>
-      <div class="info">
-        <div class="brand">AXRL MEDIA</div>
-        <h1 id="title">Voice Player</h1>
-        <span class="badge">ONLINE AUDIO</span>
-      </div>
-    </header>
 
-    <section class="disc-wrap">
-      <div class="disc" id="disc">
-        <div class="disc-center">♫</div>
-      </div>
-    </section>
+<div class="app">
 
-    <div class="wave" id="wave" aria-hidden="true">
-      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  <!-- ===== Top bar ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">&gt;_</span>
+      <span class="brand-name">TrebEdit</span>
     </div>
 
-    <section class="timeline">
-      <button class="time" id="currentTime">0:00</button>
-      <div class="track" id="track" role="slider" aria-label="تقدم الصوت" tabindex="0">
-        <div class="fill" id="fill"></div>
+    <div class="topbar-actions">
+      <label class="btn btn-ghost" for="file-upload">
+        استيراد ملفات
+        <input type="file" id="file-upload" multiple hidden>
+      </label>
+
+      <div class="entry-picker">
+        <span class="entry-label">صفحة البداية</span>
+        <select id="entry-select"></select>
       </div>
-      <button class="time" id="duration">0:00</button>
+
+      <button class="btn btn-primary" id="run-btn">
+        <span class="run-icon">▶</span> تشغيل
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Workspace ===== -->
+  <main class="workspace">
+
+    <!-- Files rail -->
+    <aside class="files-pane">
+      <div class="pane-heading">الملفات</div>
+      <ul class="file-list" id="file-list"></ul>
+      <button class="add-file-btn" id="add-file-btn">+ ملف جديد</button>
+    </aside>
+
+    <!-- Editor -->
+    <section class="editor-pane">
+      <div class="pane-heading editor-heading">
+        <span id="active-file-name">index.html</span>
+        <span class="dirty-dot" id="dirty-dot" hidden>●</span>
+      </div>
+      <div class="editor-host" id="editor-host"></div>
     </section>
 
-    <section class="controls">
-      <button class="small" id="back" aria-label="رجوع 5 ثوان">↶</button>
-      <button class="play" id="play" aria-label="تشغيل">▶</button>
-      <button class="small" id="forward" aria-label="تقديم 5 ثوان">↷</button>
+    <!-- Live preview -->
+    <section class="preview-pane">
+      <div class="pane-heading preview-heading">
+        <span>المعاينة</span>
+        <label class="auto-toggle">
+          <input type="checkbox" id="auto-run" checked>
+          تحديث تلقائي
+        </label>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe id="preview-frame" title="معاينة الموقع" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+      </div>
     </section>
 
-    <section class="volume">
-      <button class="mute" id="mute" aria-label="كتم الصوت">🔊</button>
-      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="مستوى صوت الأغنية">
-      <span id="volumeValue">80%</span>
-    </section>
-
-    <div class="status" id="status">اضغط ▶ لتشغيل الصوت</div>
-
-    <audio id="audio" preload="metadata" playsinline></audio>
-
-    <footer>AXRL MEDIA • AUDIO PLAYER</footer>
   </main>
 
-  <script src="player.js"></script>
+  <!-- ===== Side tab that opens the console ===== -->
+  <button class="console-tab" id="console-tab" aria-label="فتح الكونسول">
+    <span>الكاش</span>
+  </button>
+
+  <!-- ===== Console / cache panel ===== -->
+  <aside class="console-panel" id="console-panel">
+    <div class="console-header">
+      <span class="console-title">شاشة تشغيل الموقع</span>
+      <div class="console-actions">
+        <button class="console-icon-btn" id="console-clear" title="مسح">مسح</button>
+        <button class="console-icon-btn" id="console-close" title="إغلاق">✕</button>
+      </div>
+    </div>
+    <div class="console-body" id="console-body"></div>
+  </aside>
+  <div class="console-backdrop" id="console-backdrop"></div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
