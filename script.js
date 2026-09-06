@@ -72,6 +72,14 @@ document.getElementById("go").addEventListener("click", () => {
   const entrySelect  = document.getElementById("entry-select");
   const uploadBtn    = document.getElementById("upload-btn");
   const uploadInput  = document.getElementById("file-upload");
+
+  const pasteBtn       = document.getElementById("paste-btn");
+  const pasteBackdrop  = document.getElementById("paste-backdrop");
+  const pasteModal     = document.getElementById("paste-modal");
+  const pasteClose     = document.getElementById("paste-close");
+  const pasteFilename  = document.getElementById("paste-filename");
+  const pasteTextarea  = document.getElementById("paste-textarea");
+  const pasteSubmit    = document.getElementById("paste-submit");
   const addFileBtn   = document.getElementById("add-file-btn");
   const runBtn       = document.getElementById("run-btn");
   const autoRunBox   = document.getElementById("auto-run");
@@ -249,6 +257,13 @@ document.getElementById("go").addEventListener("click", () => {
       files.set(shortName, { content });
     }
 
+    finishImport(list.length, "استيراد");
+    uploadInput.value = "";
+  });
+
+  // Shared wrap-up after any import path (file picker, paste, or the
+  // native bridge) has already written into the `files` map.
+  function finishImport(count, sourceLabel) {
     renderFileList();
     const preferredEntry = [...files.keys()].find((n) => n.toLowerCase() === "index.html") ||
                             [...files.keys()].find((n) => /\.html?$/i.test(n));
@@ -256,11 +271,92 @@ document.getElementById("go").addEventListener("click", () => {
       entryFile = preferredEntry;
       openFile(preferredEntry);
     }
-    logConsole("system", `تم استيراد ${list.length} ملف/ملفات`);
+    logConsole("system", `تم استيراد ${count} ملف/ملفات (${sourceLabel})`);
     runPreview();
     setMobileView("editor");
-    uploadInput.value = "";
+  }
+
+  /* ---------------------------------------------------------------
+     5b. Paste-code import — works everywhere, including inside a
+     wrapped Android WebView where the native file chooser is not
+     available.
+  --------------------------------------------------------------- */
+  function openPasteModal() {
+    pasteBackdrop.classList.add("open");
+    pasteModal.classList.add("open");
+    pasteTextarea.focus();
+  }
+  function closePasteModal() {
+    pasteBackdrop.classList.remove("open");
+    pasteModal.classList.remove("open");
+  }
+
+  pasteBtn.addEventListener("click", openPasteModal);
+  pasteClose.addEventListener("click", closePasteModal);
+  pasteBackdrop.addEventListener("click", closePasteModal);
+
+  // Splits text containing one or more "### filename" markers into
+  // separate files. Returns [] if no markers are found.
+  function parseMultiFileText(raw) {
+    const markerRe = /^###\s+(.+?)\s*$/;
+    const lines = raw.split(/\r?\n/);
+    const result = [];
+    let currentName = null;
+    let currentLines = [];
+    lines.forEach((line) => {
+      const m = line.match(markerRe);
+      if (m) {
+        if (currentName) result.push({ name: currentName, content: currentLines.join("\n").trim() });
+        currentName = m[1];
+        currentLines = [];
+      } else if (currentName) {
+        currentLines.push(line);
+      }
+    });
+    if (currentName) result.push({ name: currentName, content: currentLines.join("\n").trim() });
+    return result;
+  }
+
+  pasteSubmit.addEventListener("click", () => {
+    const raw = pasteTextarea.value;
+    if (!raw.trim()) return;
+
+    const parsed = parseMultiFileText(raw);
+    let count = 0;
+
+    if (parsed.length) {
+      parsed.forEach(({ name, content }) => { files.set(name, { content }); count++; });
+    } else {
+      const name = (pasteFilename.value || "").trim() || "index.html";
+      files.set(name, { content: raw });
+      count = 1;
+    }
+
+    finishImport(count, "لصق");
+    pasteTextarea.value = "";
+    closePasteModal();
   });
+
+  /* ---------------------------------------------------------------
+     5c. Native bridge — call this from Android/Java (WebView.
+     evaluateJavascript) instead of implementing a WebChromeClient
+     file chooser. Much simpler on the native side: pick a file with
+     any native component, read it as text, then call:
+       webview1.evaluateJavascript(
+         "window.trebeditImportFiles(" + jsonString + ")", null);
+     jsonString must be a JSON array like:
+       [{"name":"index.html","content":"..."}, {"name":"style.css","content":"..."}]
+  --------------------------------------------------------------- */
+  window.trebeditImportFiles = function (list) {
+    try {
+      const parsed = typeof list === "string" ? JSON.parse(list) : list;
+      if (!Array.isArray(parsed)) throw new Error("expected an array of {name, content}");
+      parsed.forEach((f) => { if (f && f.name) files.set(f.name, { content: f.content || "" }); });
+      finishImport(parsed.length, "من التطبيق");
+    } catch (err) {
+      logConsole("error", "trebeditImportFiles: " + err.message);
+    }
+  };
 
   function readAsText(file) {
     return new Promise((resolve, reject) => {
