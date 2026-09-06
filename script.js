@@ -70,6 +70,7 @@ document.getElementById("go").addEventListener("click", () => {
   const activeNameEl = document.getElementById("active-file-name");
   const dirtyDotEl   = document.getElementById("dirty-dot");
   const entrySelect  = document.getElementById("entry-select");
+  const uploadBtn    = document.getElementById("upload-btn");
   const uploadInput  = document.getElementById("file-upload");
   const addFileBtn   = document.getElementById("add-file-btn");
   const runBtn       = document.getElementById("run-btn");
@@ -235,6 +236,8 @@ document.getElementById("go").addEventListener("click", () => {
   /* ---------------------------------------------------------------
      5. Uploading a set of site files
   --------------------------------------------------------------- */
+  uploadBtn.addEventListener("click", () => uploadInput.click());
+
   uploadInput.addEventListener("change", async (e) => {
     const list = [...e.target.files];
     if (!list.length) return;
