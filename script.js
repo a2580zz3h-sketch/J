@@ -1,9 +1,5 @@
 /* =====================================================================
-   TrebEdit — script.js
-   Loads a small "site" of files (html/css/js/...), lets you edit them,
-   builds a live preview, and streams console output from the preview
-   into a slide-in "cache" panel — like watching a script run in a
-   terminal.
+   TrebEdit — script.js (Fixed & Enhanced)
 ===================================================================== */
 
 (function () {
@@ -12,7 +8,7 @@
   /* ---------------------------------------------------------------
      1. In-memory project state
   --------------------------------------------------------------- */
-  const files = new Map(); // filename -> { content, type }
+  const files = new Map(); // filename -> { content }
 
   const DEFAULT_FILES = {
     "index.html":
@@ -96,12 +92,14 @@ document.getElementById("go").addEventListener("click", () => {
   const mobileTabsEl = document.getElementById("mobile-tabs");
   const mobileTabBtns = mobileTabsEl ? [...mobileTabsEl.querySelectorAll(".mobile-tab")] : [];
 
+  /* ---------------------------------------------------------------
+     3. Mobile view switching
+  --------------------------------------------------------------- */
   function setMobileView(view) {
     if (!workspaceEl) return;
     workspaceEl.dataset.mobileView = view;
     mobileTabBtns.forEach((btn) => btn.classList.toggle("active", btn.dataset.view === view));
-    // CodeMirror needs a refresh once its container becomes visible again.
-    if (view === "editor") setTimeout(() => editor.refresh(), 0);
+    if (view === "editor") setTimeout(() => editor.refresh(), 50);
   }
 
   mobileTabBtns.forEach((btn) => {
@@ -109,7 +107,7 @@ document.getElementById("go").addEventListener("click", () => {
   });
 
   /* ---------------------------------------------------------------
-     3. CodeMirror editor
+     4. CodeMirror editor
   --------------------------------------------------------------- */
   const editor = CodeMirror(document.getElementById("editor-host"), {
     value: "",
@@ -119,7 +117,17 @@ document.getElementById("go").addEventListener("click", () => {
     tabSize: 2,
     indentUnit: 2,
     lineWrapping: true,
-    autofocus: true
+    autofocus: false,
+    extraKeys: {
+      "Ctrl-Space": "autocomplete",
+      "Tab": function(cm) {
+        if (cm.somethingSelected()) {
+          cm.indentSelection("add");
+        } else {
+          cm.replaceSelection("  ", "end");
+        }
+      }
+    }
   });
 
   function modeForFile(name) {
@@ -127,6 +135,7 @@ document.getElementById("go").addEventListener("click", () => {
     if (/\.jsx?$/i.test(name)) return "javascript";
     if (/\.(html?|htm)$/i.test(name)) return "htmlmixed";
     if (/\.json$/i.test(name)) return { name: "javascript", json: true };
+    if (/\.(xml|svg)$/i.test(name)) return "xml";
     return "htmlmixed";
   }
 
@@ -148,13 +157,15 @@ document.getElementById("go").addEventListener("click", () => {
   }
 
   /* ---------------------------------------------------------------
-     4. File list rendering / switching
+     5. File list rendering / switching
   --------------------------------------------------------------- */
   function renderFileList() {
     fileListEl.innerHTML = "";
     [...files.keys()].sort(sortFiles).forEach((name) => {
       const li = document.createElement("li");
       li.className = name === activeFile ? "active" : "";
+      li.title = name;
+      
       const label = document.createElement("span");
       label.textContent = name;
       li.appendChild(label);
@@ -205,18 +216,22 @@ document.getElementById("go").addEventListener("click", () => {
     editor.setValue(files.get(name).content);
     setDirty(false);
     renderFileList();
+    // Ensure editor refreshes after layout changes
+    setTimeout(() => editor.refresh(), 10);
   }
 
   function removeFile(name) {
     if (!files.has(name)) return;
     files.delete(name);
     if (activeFile === name) {
-      const next = [...files.keys()][0];
+      const remaining = [...files.keys()].sort(sortFiles);
+      const next = remaining[0];
       if (next) openFile(next);
       else {
         activeFile = "";
         activeNameEl.textContent = "—";
         editor.setValue("");
+        setDirty(false);
       }
     }
     renderFileList();
@@ -224,13 +239,16 @@ document.getElementById("go").addEventListener("click", () => {
 
   function addFile(name, content = "") {
     if (!name) return;
-    if (files.has(name)) {
-      logConsole("system", `الملف "${name}" موجود بالفعل`);
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (files.has(trimmed)) {
+      logConsole("system", `الملف "${trimmed}" موجود بالفعل`);
+      openFile(trimmed);
       return;
     }
-    files.set(name, { content });
+    files.set(trimmed, { content });
     renderFileList();
-    openFile(name);
+    openFile(trimmed);
   }
 
   addFileBtn.addEventListener("click", () => {
@@ -242,27 +260,37 @@ document.getElementById("go").addEventListener("click", () => {
   });
 
   /* ---------------------------------------------------------------
-     5. Uploading a set of site files
+     6. File Upload (with webkitdirectory support + Drag & Drop)
   --------------------------------------------------------------- */
   uploadBtn.addEventListener("click", () => uploadInput.click());
 
   uploadInput.addEventListener("change", async (e) => {
     const list = [...e.target.files];
     if (!list.length) return;
-
-    for (const f of list) {
-      const relName = f.webkitRelativePath || f.name;
-      const shortName = relName.split("/").pop();
-      const content = await readAsText(f);
-      files.set(shortName, { content });
-    }
-
-    finishImport(list.length, "استيراد");
+    await importFileList(list);
     uploadInput.value = "";
   });
 
-  // Shared wrap-up after any import path (file picker, paste, or the
-  // native bridge) has already written into the `files` map.
+  async function importFileList(list) {
+    let count = 0;
+    for (const f of list) {
+      try {
+        const relName = f.webkitRelativePath || f.name;
+        // For flat structure, use filename only. 
+        // If webkitRelativePath exists (folder drop), preserve last segment.
+        const shortName = relName.split("/").pop();
+        const content = await readAsText(f);
+        files.set(shortName, { content });
+        count++;
+      } catch (err) {
+        logConsole("error", `فشل قراءة "${f.name}": ${err.message}`);
+      }
+    }
+    if (count > 0) {
+      finishImport(count, "استيراد");
+    }
+  }
+
   function finishImport(count, sourceLabel) {
     renderFileList();
     const preferredEntry = [...files.keys()].find((n) => n.toLowerCase() === "index.html") ||
@@ -277,9 +305,98 @@ document.getElementById("go").addEventListener("click", () => {
   }
 
   /* ---------------------------------------------------------------
-     5b. Paste-code import — works everywhere, including inside a
-     wrapped Android WebView where the native file chooser is not
-     available.
+     6b. Drag & Drop support
+  --------------------------------------------------------------- */
+  const dropOverlay = document.createElement("div");
+  dropOverlay.className = "drop-overlay";
+  dropOverlay.innerHTML = "<span>أفلت الملفات هنا</span>";
+  document.body.appendChild(dropOverlay);
+
+  let dragCounter = 0;
+
+  window.addEventListener("dragenter", (e) => {
+    e.preventDefault();
+    dragCounter++;
+    if (e.dataTransfer.types.includes("Files")) {
+      dropOverlay.classList.add("active");
+    }
+  });
+
+  window.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    dragCounter--;
+    if (dragCounter === 0) {
+      dropOverlay.classList.remove("active");
+    }
+  });
+
+  window.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
+  window.addEventListener("drop", async (e) => {
+    e.preventDefault();
+    dragCounter = 0;
+    dropOverlay.classList.remove("active");
+    
+    const items = e.dataTransfer.items;
+    const fileList = [];
+    
+    if (items) {
+      const promises = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind === "file") {
+          if (item.webkitGetAsEntry) {
+            const entry = item.webkitGetAsEntry();
+            if (entry) {
+              promises.push(traverseEntry(entry, fileList));
+            }
+          } else {
+            const file = item.getAsFile();
+            if (file) fileList.push(file);
+          }
+        }
+      }
+      await Promise.all(promises);
+    } else {
+      const files = e.dataTransfer.files;
+      if (files) fileList.push(...files);
+    }
+    
+    if (fileList.length) {
+      await importFileList(fileList);
+    }
+  });
+
+  function traverseEntry(entry, fileList) {
+    return new Promise((resolve) => {
+      if (entry.isFile) {
+        entry.file((file) => {
+          // Preserve relative path in webkitRelativePath-like property
+          Object.defineProperty(file, 'webkitRelativePath', {
+            value: entry.fullPath.substring(1),
+            writable: false
+          });
+          fileList.push(file);
+          resolve();
+        }, () => resolve());
+      } else if (entry.isDirectory) {
+        const reader = entry.createReader();
+        reader.readEntries(async (entries) => {
+          for (const e of entries) {
+            await traverseEntry(e, fileList);
+          }
+          resolve();
+        }, () => resolve());
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------------
+     6c. Paste-code import
   --------------------------------------------------------------- */
   function openPasteModal() {
     pasteBackdrop.classList.add("open");
@@ -295,25 +412,29 @@ document.getElementById("go").addEventListener("click", () => {
   pasteClose.addEventListener("click", closePasteModal);
   pasteBackdrop.addEventListener("click", closePasteModal);
 
-  // Splits text containing one or more "### filename" markers into
-  // separate files. Returns [] if no markers are found.
   function parseMultiFileText(raw) {
-    const markerRe = /^###\s+(.+?)\s*$/;
+    const markerRe = /^###\s+(.+?)\s*$/m;
     const lines = raw.split(/\r?\n/);
     const result = [];
     let currentName = null;
     let currentLines = [];
+    
     lines.forEach((line) => {
-      const m = line.match(markerRe);
+      const m = line.match(/^###\s+(.+?)\s*$/);
       if (m) {
-        if (currentName) result.push({ name: currentName, content: currentLines.join("\n").trim() });
-        currentName = m[1];
+        if (currentName) {
+          result.push({ name: currentName, content: currentLines.join("\n").trim() });
+        }
+        currentName = m[1].trim();
         currentLines = [];
-      } else if (currentName) {
+      } else if (currentName !== null) {
         currentLines.push(line);
       }
     });
-    if (currentName) result.push({ name: currentName, content: currentLines.join("\n").trim() });
+    
+    if (currentName) {
+      result.push({ name: currentName, content: currentLines.join("\n").trim() });
+    }
     return result;
   }
 
@@ -324,8 +445,11 @@ document.getElementById("go").addEventListener("click", () => {
     const parsed = parseMultiFileText(raw);
     let count = 0;
 
-    if (parsed.length) {
-      parsed.forEach(({ name, content }) => { files.set(name, { content }); count++; });
+    if (parsed.length > 0) {
+      parsed.forEach(({ name, content }) => {
+        files.set(name, { content });
+        count++;
+      });
     } else {
       const name = (pasteFilename.value || "").trim() || "index.html";
       files.set(name, { content: raw });
@@ -338,20 +462,15 @@ document.getElementById("go").addEventListener("click", () => {
   });
 
   /* ---------------------------------------------------------------
-     5c. Native bridge — call this from Android/Java (WebView.
-     evaluateJavascript) instead of implementing a WebChromeClient
-     file chooser. Much simpler on the native side: pick a file with
-     any native component, read it as text, then call:
-       webview1.evaluateJavascript(
-         "window.trebeditImportFiles(" + jsonString + ")", null);
-     jsonString must be a JSON array like:
-       [{"name":"index.html","content":"..."}, {"name":"style.css","content":"..."}]
+     6d. Native bridge for Android/WebView
   --------------------------------------------------------------- */
   window.trebeditImportFiles = function (list) {
     try {
       const parsed = typeof list === "string" ? JSON.parse(list) : list;
       if (!Array.isArray(parsed)) throw new Error("expected an array of {name, content}");
-      parsed.forEach((f) => { if (f && f.name) files.set(f.name, { content: f.content || "" }); });
+      parsed.forEach((f) => { 
+        if (f && f.name) files.set(f.name, { content: f.content || "" }); 
+      });
       finishImport(parsed.length, "من التطبيق");
     } catch (err) {
       logConsole("error", "trebeditImportFiles: " + err.message);
@@ -362,7 +481,7 @@ document.getElementById("go").addEventListener("click", () => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsText(file);
     });
   }
@@ -373,7 +492,7 @@ document.getElementById("go").addEventListener("click", () => {
   });
 
   /* ---------------------------------------------------------------
-     6. Building the live preview
+     7. Building the live preview
   --------------------------------------------------------------- */
   const CONSOLE_BRIDGE = `
 <script>
@@ -381,14 +500,14 @@ document.getElementById("go").addEventListener("click", () => {
   function send(level, args){
     try{
       var msg = args.map(function(a){
-        if (a instanceof Error) return a.message;
-        if (typeof a === "object") { try { return JSON.stringify(a); } catch(e){ return String(a); } }
+        if (a instanceof Error) return a.stack || a.message;
+        if (typeof a === "object") { try { return JSON.stringify(a, null, 2); } catch(e){ return String(a); } }
         return String(a);
       }).join(" ");
       window.parent.postMessage({ __trebedit: true, level: level, message: msg }, "*");
     }catch(e){}
   }
-  ["log","info","warn","error"].forEach(function(level){
+  ["log","info","warn","error","debug"].forEach(function(level){
     var original = console[level] ? console[level].bind(console) : function(){};
     console[level] = function(){
       send(level, Array.prototype.slice.call(arguments));
@@ -396,7 +515,7 @@ document.getElementById("go").addEventListener("click", () => {
     };
   });
   window.addEventListener("error", function(e){
-    send("error", [e.message + " (" + (e.filename || "") + ":" + (e.lineno || "") + ")"]);
+    send("error", [e.message + " (" + (e.filename || "") + ":" + (e.lineno || "") + ":" + (e.colno || "") + ")"]);
   });
   window.addEventListener("unhandledrejection", function(e){
     send("error", ["Unhandled promise rejection: " + (e.reason && e.reason.message ? e.reason.message : e.reason)]);
@@ -409,37 +528,47 @@ document.getElementById("go").addEventListener("click", () => {
       logConsole("system", "مفيش صفحة بداية HTML اتحددت");
       return;
     }
+    
     let html = files.get(entryFile).content;
 
-    // inline <link rel="stylesheet" href="X">
-    html = html.replace(/<link\b[^>]*href=["']([^"']+)["'][^>]*>/gi, (tag, href) => {
+    // Inline <link rel="stylesheet" href="X">
+    html = html.replace(/<link\b([^>]*)href=["']([^"']+)["']([^>]*)>/gi, (tag, before, href, after) => {
       if (!/stylesheet/i.test(tag)) return tag;
       const match = matchFile(href);
       if (!match) return tag;
       return `<style>\n${files.get(match).content}\n</style>`;
     });
 
-    // inline <script src="X"></script>
-    html = html.replace(/<script\b[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi, (tag, src) => {
+    // Inline <script src="X"></script>
+    html = html.replace(/<script\b([^>]*)src=["']([^"']+)["']([^>]*)><\/script>/gi, (tag, before, src, after) => {
       const match = matchFile(src);
       if (!match) return tag;
-      return `<script>\n${files.get(match).content}\n<\/script>`;
+      return `<script${before}${after}>\n${files.get(match).content}\n<\/script>`;
     });
 
-    // inject console bridge as early as possible
+    // Inject console bridge as early as possible
     if (/<head[^>]*>/i.test(html)) {
       html = html.replace(/<head[^>]*>/i, (m) => `${m}${CONSOLE_BRIDGE}`);
+    } else if (/<html[^>]*>/i.test(html)) {
+      html = html.replace(/<html[^>]*>/i, (m) => `${m}<head>${CONSOLE_BRIDGE}</head>`);
     } else {
       html = CONSOLE_BRIDGE + html;
     }
 
     clearConsole(true);
     logConsole("system", `تشغيل ${entryFile} …`);
-    previewFrame.srcdoc = html;
+    
+    try {
+      previewFrame.srcdoc = html;
+    } catch (err) {
+      logConsole("error", "فشل تحميل المعاينة: " + err.message);
+    }
   }
 
   function matchFile(refPath) {
-    const short = refPath.split("/").pop().split("?")[0].split("#")[0];
+    const clean = refPath.split("?")[0].split("#")[0];
+    const short = clean.split("/").pop();
+    if (files.has(clean)) return clean;
     if (files.has(short)) return short;
     const found = [...files.keys()].find((n) => n.toLowerCase() === short.toLowerCase());
     return found || null;
@@ -451,7 +580,7 @@ document.getElementById("go").addEventListener("click", () => {
   });
 
   /* ---------------------------------------------------------------
-     7. Console / "cache" panel
+     8. Console panel
   --------------------------------------------------------------- */
   function timestamp() {
     const d = new Date();
@@ -481,7 +610,7 @@ document.getElementById("go").addEventListener("click", () => {
 
   function clearConsole(silent) {
     consoleBody.innerHTML = "";
-    if (!silent) logConsole("system", "تم مسح الكاش");
+    if (!silent) logConsole("system", "تم مسح الكونسول");
   }
 
   window.addEventListener("message", (e) => {
@@ -505,17 +634,24 @@ document.getElementById("go").addEventListener("click", () => {
   }
 
   /* ---------------------------------------------------------------
-     8. Keyboard shortcut: Ctrl/Cmd + Enter -> run
+     9. Keyboard shortcuts
   --------------------------------------------------------------- */
   window.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault();
       runPreview();
+      if (window.innerWidth <= 700) setMobileView("preview");
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+      e.preventDefault();
+      // Trigger run to "save" state
+      runPreview();
+      logConsole("system", "تم حفظ الحالة وتشغيل المعاينة");
     }
   });
 
   /* ---------------------------------------------------------------
-     9. Boot with sample project
+     10. Boot with sample project
   --------------------------------------------------------------- */
   Object.entries(DEFAULT_FILES).forEach(([name, content]) => files.set(name, { content }));
   renderFileList();

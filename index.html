@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>TrebEdit — معاينة وتحرير المواقع</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,12 +27,12 @@
 
     <div class="topbar-actions">
       <button type="button" class="btn btn-ghost" id="upload-btn">
-        استيراد ملفات
+        📁 استيراد ملفات
       </button>
-      <input type="file" id="file-upload" multiple hidden>
+      <input type="file" id="file-upload" multiple webkitdirectory hidden>
 
       <button type="button" class="btn btn-ghost" id="paste-btn">
-        لصق كود
+        📋 لصق كود
       </button>
 
       <div class="entry-picker">
@@ -46,7 +46,7 @@
     </div>
   </header>
 
-  <!-- ===== Mobile view switcher (hidden on wide screens) ===== -->
+  <!-- ===== Mobile view switcher ===== -->
   <nav class="mobile-tabs" id="mobile-tabs">
     <button class="mobile-tab" data-view="files">الملفات</button>
     <button class="mobile-tab active" data-view="editor">المحرر</button>
@@ -82,18 +82,18 @@
         </label>
       </div>
       <div class="preview-frame-wrap">
-        <iframe id="preview-frame" title="معاينة الموقع" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+        <iframe id="preview-frame" title="معاينة الموقع" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"></iframe>
       </div>
     </section>
 
   </main>
 
-  <!-- ===== Side tab that opens the console ===== -->
+  <!-- ===== Console side tab ===== -->
   <button class="console-tab" id="console-tab" aria-label="فتح الكونسول">
-    <span>الكاش</span>
+    <span>الكونسول</span>
   </button>
 
-  <!-- ===== Console / cache panel ===== -->
+  <!-- ===== Console panel ===== -->
   <aside class="console-panel" id="console-panel">
     <div class="console-header">
       <span class="console-title">شاشة تشغيل الموقع</span>

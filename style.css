@@ -1,6 +1,5 @@
 /* ===================================================================
    TrebEdit — design tokens
-   base surface: white | accent: olive | console: dark terminal
 =================================================================== */
 :root{
   --white:        #ffffff;
@@ -38,9 +37,10 @@ body{
   color:var(--ink);
   font-family:var(--font-ui);
   overflow:hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
-button, select, input{ font-family:inherit; }
+button, select, input, textarea{ font-family:inherit; }
 
 .app{
   height:100vh;
@@ -60,12 +60,14 @@ button, select, input{ font-family:inherit; }
   padding:0 18px;
   border-bottom:1px solid var(--line);
   background:var(--white);
+  gap:12px;
 }
 
 .brand{
   display:flex;
   align-items:center;
   gap:8px;
+  flex-shrink:0;
 }
 .brand-mark{
   font-family:var(--font-code);
@@ -81,12 +83,15 @@ button, select, input{ font-family:inherit; }
   font-weight:700;
   font-size:18px;
   letter-spacing:0.2px;
+  white-space:nowrap;
 }
 
 .topbar-actions{
   display:flex;
   align-items:center;
   gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
 }
 
 .entry-picker{
@@ -103,6 +108,7 @@ button, select, input{ font-family:inherit; }
   border-radius:7px;
   padding:6px 8px;
   font-size:12px;
+  min-width:120px;
 }
 
 .btn{
@@ -119,6 +125,7 @@ button, select, input{ font-family:inherit; }
   cursor:pointer;
   white-space:nowrap;
   transition:background .15s ease, border-color .15s ease, transform .05s ease;
+  touch-action: manipulation;
 }
 .btn:hover{ background:var(--olive-tint); border-color:var(--olive-tint-2); }
 .btn:active{ transform:translateY(1px); }
@@ -137,7 +144,7 @@ button, select, input{ font-family:inherit; }
 .workspace{
   flex:1 1 auto;
   display:grid;
-  grid-template-columns:180px 1fr 1fr;
+  grid-template-columns:200px 1fr 1fr;
   min-height:0;
 }
 
@@ -179,6 +186,7 @@ button, select, input{ font-family:inherit; }
   cursor:pointer;
   color:var(--ink-soft);
   margin-bottom:2px;
+  word-break:break-all;
 }
 .file-list li:hover{ background:var(--olive-tint); color:var(--ink); }
 .file-list li.active{
@@ -195,6 +203,7 @@ button, select, input{ font-family:inherit; }
   font-size:13px;
   line-height:1;
   padding:2px;
+  flex-shrink:0;
 }
 .file-list li:hover .remove-file{ opacity:.65; }
 .file-list li .remove-file:hover{ opacity:1; }
@@ -294,8 +303,6 @@ button, select, input{ font-family:inherit; }
   transition:width .15s ease, background .15s ease;
 }
 .console-tab:hover{ background:var(--olive-dark); width:38px; }
-/* Arabic text is written with the letters joined together; rotating the
-   whole word keeps that shaping intact (writing-mode breaks it apart). */
 .console-tab span{
   display:inline-block;
   transform:rotate(-90deg);
@@ -305,7 +312,7 @@ button, select, input{ font-family:inherit; }
   letter-spacing:0.5px;
 }
 
-/* ===================== Console / cache panel ===================== */
+/* ===================== Console panel ===================== */
 .console-backdrop{
   position:fixed;
   inset:0;
@@ -502,13 +509,35 @@ button, select, input{ font-family:inherit; }
   justify-content:center;
 }
 
-@media (max-width: 880px){
-  .modal-panel{ width:94vw; max-height:90vh; }
+/* ===================== Drag & Drop overlay ===================== */
+.drop-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(107,111,59,.15);
+  border:4px dashed var(--olive);
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+.drop-overlay.active{
+  display:flex;
+}
+.drop-overlay span{
+  background:var(--olive);
+  color:#fff;
+  padding:16px 28px;
+  border-radius:12px;
+  font-weight:700;
+  font-size:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);
 }
 
 /* ===================== Scrollbars ===================== */
 .file-list::-webkit-scrollbar,
-.console-body::-webkit-scrollbar{ width:8px; }
+.console-body::-webkit-scrollbar,
+.paste-textarea::-webkit-scrollbar{ width:8px; }
 .file-list::-webkit-scrollbar-thumb{ background:var(--olive-tint-2); border-radius:8px; }
 .console-body::-webkit-scrollbar-thumb{ background:var(--term-line); border-radius:8px; }
 
@@ -539,22 +568,32 @@ button, select, input{ font-family:inherit; }
 }
 
 /* ===================== Responsive ===================== */
-@media (max-width: 880px){
+@media (max-width: 900px){
   .topbar{
     height:auto;
-    flex-wrap:wrap;
     padding:10px 14px;
-    gap:10px;
+    gap:8px;
   }
   .topbar-actions{
     flex-basis:100%;
     justify-content:space-between;
+    gap:8px;
   }
   .entry-picker{
     flex:1 1 auto;
-    flex-direction:column;
-    align-items:stretch;
-    gap:4px;
+    flex-direction:row;
+    align-items:center;
+    gap:6px;
+  }
+  .entry-picker select{ width:auto; flex:1; }
+}
+
+@media (max-width: 700px){
+  .topbar-actions{
+    flex-wrap:wrap;
+  }
+  .entry-picker{
+    flex-basis:100%;
   }
   .entry-picker select{ width:100%; }
 
@@ -565,8 +604,6 @@ button, select, input{ font-family:inherit; }
     grid-template-rows:1fr;
   }
 
-  /* Only the pane matching the active mobile tab is shown, and it takes
-     the full remaining height instead of a cramped equal split. */
   .workspace [data-pane]{ display:none; }
   .workspace[data-mobile-view="files"]   [data-pane="files"],
   .workspace[data-mobile-view="editor"]  [data-pane="editor"],
@@ -576,4 +613,9 @@ button, select, input{ font-family:inherit; }
 
   .files-pane, .editor-pane{ border-inline-end:none; border-bottom:none; }
   .preview-frame-wrap{ padding:10px; }
+}
+
+@media (max-width: 400px){
+  .btn{ padding:6px 10px; font-size:12px; }
+  .brand-name{ font-size:16px; }
 }
