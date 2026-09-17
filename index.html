@@ -1,139 +1,336 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TrebEdit — معاينة وتحرير المواقع</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>NEXUS XO</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/neat.min.css">
-
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="app">
+<div class="background">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+</div>
 
-  <!-- ===== Top bar ===== -->
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark">&gt;_</span>
-      <span class="brand-name">TrebEdit</span>
+<!-- ================= AUTH ================= -->
+
+<section id="authScreen" class="screen">
+
+    <div class="glass auth-box">
+
+        <div class="logo">
+            <span>NEXUS</span>
+            <b>XO</b>
+        </div>
+
+        <p class="subtitle">ONLINE 3D TIC TAC TOE</p>
+
+        <div id="loginForm">
+
+            <h2>تسجيل الدخول</h2>
+
+            <input
+                id="loginEmail"
+                type="email"
+                placeholder="البريد الإلكتروني"
+                autocomplete="email"
+            >
+
+            <input
+                id="loginPassword"
+                type="password"
+                placeholder="كلمة المرور"
+                autocomplete="current-password"
+            >
+
+            <button id="loginBtn" class="primary">
+                دخول
+            </button>
+
+            <button id="showRegisterBtn" class="text-btn">
+                إنشاء حساب جديد
+            </button>
+
+        </div>
+
+        <div id="registerForm" class="hidden">
+
+            <h2>إنشاء حساب</h2>
+
+            <input
+                id="registerEmail"
+                type="email"
+                placeholder="البريد الإلكتروني"
+                autocomplete="email"
+            >
+
+            <input
+                id="registerPassword"
+                type="password"
+                placeholder="كلمة المرور"
+                autocomplete="new-password"
+            >
+
+            <button id="registerBtn" class="primary">
+                إنشاء الحساب
+            </button>
+
+            <button id="showLoginBtn" class="text-btn">
+                لدي حساب بالفعل
+            </button>
+
+        </div>
+
+        <div id="authMessage" class="message"></div>
+
     </div>
 
-    <div class="topbar-actions">
-      <button type="button" class="btn btn-ghost" id="upload-btn">
-        📁 استيراد ملفات
-      </button>
-      <input type="file" id="file-upload" multiple webkitdirectory hidden>
+</section>
 
-      <button type="button" class="btn btn-ghost" id="paste-btn">
-        📋 لصق كود
-      </button>
 
-      <div class="entry-picker">
-        <span class="entry-label">صفحة البداية</span>
-        <select id="entry-select"></select>
-      </div>
+<!-- ================= USERNAME ================= -->
 
-      <button class="btn btn-primary" id="run-btn">
-        <span class="run-icon">▶</span> تشغيل
-      </button>
+<section id="usernameScreen" class="screen hidden">
+
+    <div class="glass setup-box">
+
+        <div class="logo">
+            <span>NEXUS</span>
+            <b>XO</b>
+        </div>
+
+        <h2>اختار الـ Username</h2>
+
+        <p>
+            هذا الاسم سيظهر للاعبين عند البحث عنك.
+        </p>
+
+        <input
+            id="usernameInput"
+            type="text"
+            maxlength="20"
+            placeholder="مثال: LORD"
+        >
+
+        <button id="saveUsernameBtn" class="primary">
+            تأكيد الـ Username
+        </button>
+
+        <div id="usernameMessage" class="message"></div>
+
     </div>
-  </header>
 
-  <!-- ===== Mobile view switcher ===== -->
-  <nav class="mobile-tabs" id="mobile-tabs">
-    <button class="mobile-tab" data-view="files">الملفات</button>
-    <button class="mobile-tab active" data-view="editor">المحرر</button>
-    <button class="mobile-tab" data-view="preview">المعاينة</button>
-  </nav>
+</section>
 
-  <!-- ===== Workspace ===== -->
-  <main class="workspace" data-mobile-view="editor">
 
-    <!-- Files rail -->
-    <aside class="files-pane" data-pane="files">
-      <div class="pane-heading">الملفات</div>
-      <ul class="file-list" id="file-list"></ul>
-      <button class="add-file-btn" id="add-file-btn">+ ملف جديد</button>
-    </aside>
+<!-- ================= LOBBY ================= -->
 
-    <!-- Editor -->
-    <section class="editor-pane" data-pane="editor">
-      <div class="pane-heading editor-heading">
-        <span id="active-file-name">index.html</span>
-        <span class="dirty-dot" id="dirty-dot" hidden>●</span>
-      </div>
-      <div class="editor-host" id="editor-host"></div>
-    </section>
+<section id="lobbyScreen" class="screen hidden">
 
-    <!-- Live preview -->
-    <section class="preview-pane" data-pane="preview">
-      <div class="pane-heading preview-heading">
-        <span>المعاينة</span>
-        <label class="auto-toggle">
-          <input type="checkbox" id="auto-run" checked>
-          تحديث تلقائي
-        </label>
-      </div>
-      <div class="preview-frame-wrap">
-        <iframe id="preview-frame" title="معاينة الموقع" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"></iframe>
-      </div>
-    </section>
+    <div class="lobby">
 
-  </main>
+        <header class="topbar glass">
 
-  <!-- ===== Console side tab ===== -->
-  <button class="console-tab" id="console-tab" aria-label="فتح الكونسول">
-    <span>الكونسول</span>
-  </button>
+            <div class="logo small">
+                <span>NEXUS</span>
+                <b>XO</b>
+            </div>
 
-  <!-- ===== Console panel ===== -->
-  <aside class="console-panel" id="console-panel">
-    <div class="console-header">
-      <span class="console-title">شاشة تشغيل الموقع</span>
-      <div class="console-actions">
-        <button class="console-icon-btn" id="console-clear" title="مسح">مسح</button>
-        <button class="console-icon-btn" id="console-close" title="إغلاق">✕</button>
-      </div>
+            <div class="profile">
+                <span id="myUsername">@username</span>
+
+                <button id="logoutBtn" class="logout">
+                    خروج
+                </button>
+            </div>
+
+        </header>
+
+
+        <div class="lobby-content">
+
+            <div class="glass search-box">
+
+                <h2>العب مع صديق</h2>
+
+                <p class="muted">
+                    ابحث عن Username اللاعب
+                </p>
+
+                <div class="search-row">
+
+                    <input
+                        id="searchInput"
+                        type="text"
+                        placeholder="ابحث عن لاعب..."
+                    >
+
+                    <button id="searchBtn" class="primary">
+                        بحث
+                    </button>
+
+                </div>
+
+                <div id="searchResults"></div>
+
+            </div>
+
+
+            <div class="glass requests-box">
+
+                <h2>طلبات اللعب</h2>
+
+                <div id="requestsList">
+                    <div class="empty">
+                        لا توجد طلبات حاليًا
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-    <div class="console-body" id="console-body"></div>
-  </aside>
-  <div class="console-backdrop" id="console-backdrop"></div>
 
-  <!-- ===== Paste-code import modal ===== -->
-  <div class="modal-backdrop" id="paste-backdrop"></div>
-  <div class="modal-panel" id="paste-modal">
-    <div class="modal-header">
-      <span>لصق كود الموقع</span>
-      <button class="console-icon-btn" id="paste-close">✕</button>
+</section>
+
+
+<!-- ================= GAME ================= -->
+
+<section id="gameScreen" class="screen hidden">
+
+    <div class="game-wrapper">
+
+        <header class="game-header glass">
+
+            <div class="player-card">
+
+                <div class="avatar x-avatar">
+                    X
+                </div>
+
+                <div>
+                    <span class="label">PLAYER X</span>
+                    <strong id="playerXName">---</strong>
+                </div>
+
+            </div>
+
+
+            <div class="vs">
+                VS
+            </div>
+
+
+            <div class="player-card">
+
+                <div class="avatar o-avatar">
+                    O
+                </div>
+
+                <div>
+                    <span class="label">PLAYER O</span>
+                    <strong id="playerOName">---</strong>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <div class="turn-status glass">
+
+            <span id="turnText">
+                جاري تحميل المباراة...
+            </span>
+
+        </div>
+
+
+        <div class="board-scene">
+
+            <div id="board" class="board">
+
+                <button class="cell" data-index="0"></button>
+                <button class="cell" data-index="1"></button>
+                <button class="cell" data-index="2"></button>
+
+                <button class="cell" data-index="3"></button>
+                <button class="cell" data-index="4"></button>
+                <button class="cell" data-index="5"></button>
+
+                <button class="cell" data-index="6"></button>
+                <button class="cell" data-index="7"></button>
+                <button class="cell" data-index="8"></button>
+
+            </div>
+
+        </div>
+
+
+        <div class="game-actions">
+
+            <button id="backLobbyBtn" class="secondary">
+                العودة للّوبي
+            </button>
+
+            <button id="rematchBtn" class="primary hidden">
+                إعادة المباراة
+            </button>
+
+        </div>
+
+
+        <div id="gameMessage" class="message"></div>
+
     </div>
-    <p class="modal-hint">
-      الصق كود ملف واحد وحط اسمه تحت — أو الصق أكتر من ملف مع سطر عنوان قبل كل واحد بالشكل
-      <code>### اسم_الملف</code> زي كده:
-    </p>
-    <pre class="modal-example">### index.html
-&lt;html&gt;...&lt;/html&gt;
 
-### style.css
-body{ ... }</pre>
-    <input type="text" id="paste-filename" class="paste-filename-input" placeholder="اسم الملف (لو هتلصق ملف واحد بس)" value="index.html">
-    <textarea id="paste-textarea" class="paste-textarea" placeholder="الصق الكود هنا…" spellcheck="false"></textarea>
-    <button class="btn btn-primary paste-submit-btn" id="paste-submit">إضافة للمشروع</button>
-  </div>
+</section>
+
+
+<!-- ================= INVITATION ================= -->
+
+<div id="inviteModal" class="modal hidden">
+
+    <div class="glass modal-box">
+
+        <div class="invite-icon">
+            ⚔
+        </div>
+
+        <h2>تحدي جديد!</h2>
+
+        <p>
+            اللاعب
+            <strong id="inviteFrom"></strong>
+            يريد اللعب معك.
+        </p>
+
+        <div class="modal-actions">
+
+            <button id="acceptInviteBtn" class="primary">
+                قبول
+            </button>
+
+            <button id="rejectInviteBtn" class="secondary">
+                رفض
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
-<script src="script.js"></script>
+
+<div id="toast"></div>
+
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
