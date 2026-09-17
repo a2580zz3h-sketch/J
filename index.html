@@ -2,34 +2,59 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
-    <title>NEXUS XO</title>
+    <title>NEXUS WORLD</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="background">
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
+<!-- =========================================================
+     LOADING
+========================================================= -->
+
+<div id="loadingScreen" class="screen loading-screen">
+
+    <div class="loading-logo">
+        <span>NEXUS</span>
+        <b>WORLD</b>
+    </div>
+
+    <div class="loading-bar">
+        <div id="loadingProgress"></div>
+    </div>
+
+    <div id="loadingText">
+        جاري تشغيل العالم...
+    </div>
+
 </div>
 
-<!-- ================= AUTH ================= -->
 
-<section id="authScreen" class="screen">
+<!-- =========================================================
+     AUTH
+========================================================= -->
 
-    <div class="glass auth-box">
+<div id="authScreen" class="screen hidden">
 
-        <div class="logo">
-            <span>NEXUS</span>
-            <b>XO</b>
+    <div class="auth-card">
+
+        <div class="brand">
+            <div>NEXUS</div>
+            <span>WORLD</span>
         </div>
 
-        <p class="subtitle">ONLINE 3D TIC TAC TOE</p>
+        <p class="brand-sub">
+            OPEN WORLD • ONLINE • 3D
+        </p>
 
-        <div id="loginForm">
+
+        <div id="loginPanel">
 
             <h2>تسجيل الدخول</h2>
 
@@ -37,297 +62,490 @@
                 id="loginEmail"
                 type="email"
                 placeholder="البريد الإلكتروني"
-                autocomplete="email"
             >
 
             <input
                 id="loginPassword"
                 type="password"
                 placeholder="كلمة المرور"
-                autocomplete="current-password"
             >
 
-            <button id="loginBtn" class="primary">
-                دخول
+            <button id="loginButton" class="main-button">
+                دخول إلى العالم
             </button>
 
-            <button id="showRegisterBtn" class="text-btn">
-                إنشاء حساب جديد
+            <button id="openRegister" class="link-button">
+                إنشاء حساب
             </button>
 
         </div>
 
-        <div id="registerForm" class="hidden">
 
-            <h2>إنشاء حساب</h2>
+        <div id="registerPanel" class="hidden">
+
+            <h2>حساب جديد</h2>
 
             <input
                 id="registerEmail"
                 type="email"
                 placeholder="البريد الإلكتروني"
-                autocomplete="email"
             >
 
             <input
                 id="registerPassword"
                 type="password"
                 placeholder="كلمة المرور"
-                autocomplete="new-password"
             >
 
-            <button id="registerBtn" class="primary">
+            <button id="registerButton" class="main-button">
                 إنشاء الحساب
             </button>
 
-            <button id="showLoginBtn" class="text-btn">
-                لدي حساب بالفعل
-            </button>
-
-        </div>
-
-        <div id="authMessage" class="message"></div>
-
-    </div>
-
-</section>
-
-
-<!-- ================= USERNAME ================= -->
-
-<section id="usernameScreen" class="screen hidden">
-
-    <div class="glass setup-box">
-
-        <div class="logo">
-            <span>NEXUS</span>
-            <b>XO</b>
-        </div>
-
-        <h2>اختار الـ Username</h2>
-
-        <p>
-            هذا الاسم سيظهر للاعبين عند البحث عنك.
-        </p>
-
-        <input
-            id="usernameInput"
-            type="text"
-            maxlength="20"
-            placeholder="مثال: LORD"
-        >
-
-        <button id="saveUsernameBtn" class="primary">
-            تأكيد الـ Username
-        </button>
-
-        <div id="usernameMessage" class="message"></div>
-
-    </div>
-
-</section>
-
-
-<!-- ================= LOBBY ================= -->
-
-<section id="lobbyScreen" class="screen hidden">
-
-    <div class="lobby">
-
-        <header class="topbar glass">
-
-            <div class="logo small">
-                <span>NEXUS</span>
-                <b>XO</b>
-            </div>
-
-            <div class="profile">
-                <span id="myUsername">@username</span>
-
-                <button id="logoutBtn" class="logout">
-                    خروج
-                </button>
-            </div>
-
-        </header>
-
-
-        <div class="lobby-content">
-
-            <div class="glass search-box">
-
-                <h2>العب مع صديق</h2>
-
-                <p class="muted">
-                    ابحث عن Username اللاعب
-                </p>
-
-                <div class="search-row">
-
-                    <input
-                        id="searchInput"
-                        type="text"
-                        placeholder="ابحث عن لاعب..."
-                    >
-
-                    <button id="searchBtn" class="primary">
-                        بحث
-                    </button>
-
-                </div>
-
-                <div id="searchResults"></div>
-
-            </div>
-
-
-            <div class="glass requests-box">
-
-                <h2>طلبات اللعب</h2>
-
-                <div id="requestsList">
-                    <div class="empty">
-                        لا توجد طلبات حاليًا
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================= GAME ================= -->
-
-<section id="gameScreen" class="screen hidden">
-
-    <div class="game-wrapper">
-
-        <header class="game-header glass">
-
-            <div class="player-card">
-
-                <div class="avatar x-avatar">
-                    X
-                </div>
-
-                <div>
-                    <span class="label">PLAYER X</span>
-                    <strong id="playerXName">---</strong>
-                </div>
-
-            </div>
-
-
-            <div class="vs">
-                VS
-            </div>
-
-
-            <div class="player-card">
-
-                <div class="avatar o-avatar">
-                    O
-                </div>
-
-                <div>
-                    <span class="label">PLAYER O</span>
-                    <strong id="playerOName">---</strong>
-                </div>
-
-            </div>
-
-        </header>
-
-
-        <div class="turn-status glass">
-
-            <span id="turnText">
-                جاري تحميل المباراة...
-            </span>
-
-        </div>
-
-
-        <div class="board-scene">
-
-            <div id="board" class="board">
-
-                <button class="cell" data-index="0"></button>
-                <button class="cell" data-index="1"></button>
-                <button class="cell" data-index="2"></button>
-
-                <button class="cell" data-index="3"></button>
-                <button class="cell" data-index="4"></button>
-                <button class="cell" data-index="5"></button>
-
-                <button class="cell" data-index="6"></button>
-                <button class="cell" data-index="7"></button>
-                <button class="cell" data-index="8"></button>
-
-            </div>
-
-        </div>
-
-
-        <div class="game-actions">
-
-            <button id="backLobbyBtn" class="secondary">
-                العودة للّوبي
-            </button>
-
-            <button id="rematchBtn" class="primary hidden">
-                إعادة المباراة
+            <button id="openLogin" class="link-button">
+                لدي حساب
             </button>
 
         </div>
 
 
-        <div id="gameMessage" class="message"></div>
-
-    </div>
-
-</section>
-
-
-<!-- ================= INVITATION ================= -->
-
-<div id="inviteModal" class="modal hidden">
-
-    <div class="glass modal-box">
-
-        <div class="invite-icon">
-            ⚔
-        </div>
-
-        <h2>تحدي جديد!</h2>
-
-        <p>
-            اللاعب
-            <strong id="inviteFrom"></strong>
-            يريد اللعب معك.
-        </p>
-
-        <div class="modal-actions">
-
-            <button id="acceptInviteBtn" class="primary">
-                قبول
-            </button>
-
-            <button id="rejectInviteBtn" class="secondary">
-                رفض
-            </button>
-
-        </div>
+        <div id="authError"></div>
 
     </div>
 
 </div>
 
 
-<div id="toast"></div>
+<!-- =========================================================
+     USERNAME
+========================================================= -->
+
+<div id="usernameScreen" class="screen hidden">
+
+    <div class="auth-card">
+
+        <div class="brand small">
+            NEXUS WORLD
+        </div>
+
+        <h2>اختر اسم شخصيتك</h2>
+
+        <p class="description">
+            سيستخدم اللاعبون هذا الاسم للعثور عليك وإرسال طلبات الصداقة.
+        </p>
+
+        <input
+            id="usernameInput"
+            maxlength="20"
+            placeholder="مثال: LORD"
+        >
+
+        <button
+            id="createUsername"
+            class="main-button"
+        >
+            دخول العالم
+        </button>
+
+        <div id="usernameError"></div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     GAME
+========================================================= -->
+
+<div id="gameContainer" class="hidden">
+
+    <canvas id="gameCanvas"></canvas>
+
+
+    <!-- TOP HUD -->
+
+    <div class="top-hud">
+
+        <div class="player-hud glass">
+
+            <div class="player-avatar">
+                N
+            </div>
+
+            <div>
+                <strong id="hudUsername">
+                    @PLAYER
+                </strong>
+
+                <small id="hudId">
+                    ID: ------
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="world-info glass">
+
+            <div id="clockIcon">
+                ☀
+            </div>
+
+            <span id="worldClock">
+                12:00
+            </span>
+        </div>
+
+
+        <button
+            id="menuButton"
+            class="hud-button glass"
+        >
+            ☰
+        </button>
+
+    </div>
+
+
+    <!-- CROSSHAIR -->
+
+    <div id="crosshair">
+        <span></span>
+        <span></span>
+    </div>
+
+
+    <!-- ACTION HINT -->
+
+    <div
+        id="actionHint"
+        class="action-hint hidden"
+    >
+        انقر لكسر العنصر
+    </div>
+
+
+    <!-- HOTBAR -->
+
+    <div id="hotbar">
+
+        <div class="hotbar-slot selected" data-slot="0">
+            <span class="slot-number">1</span>
+            <span class="item-icon">🪵</span>
+            <span class="item-count" id="countWood">0</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="1">
+            <span class="slot-number">2</span>
+            <span class="item-icon">🪨</span>
+            <span class="item-count" id="countStone">0</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="2">
+            <span class="slot-number">3</span>
+            <span class="item-icon">🧱</span>
+            <span class="item-count" id="countDirt">0</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="3">
+            <span class="slot-number">4</span>
+            <span class="item-icon">🪵</span>
+            <span class="item-count" id="countPlank">0</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="4">
+            <span class="slot-number">5</span>
+            <span class="item-icon">🌱</span>
+            <span class="item-count">∞</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="5">
+            <span class="slot-number">6</span>
+            <span class="item-icon">🪑</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="6">
+            <span class="slot-number">7</span>
+            <span class="item-icon">🛏️</span>
+        </div>
+
+        <div class="hotbar-slot" data-slot="7">
+            <span class="slot-number">8</span>
+            <span class="item-icon">🧰</span>
+        </div>
+
+    </div>
+
+
+    <!-- MOBILE CONTROLS -->
+
+    <div id="mobileControls">
+
+        <div class="movement-pad">
+
+            <button data-move="forward">▲</button>
+
+            <div>
+                <button data-move="left">◀</button>
+                <button data-move="back">▼</button>
+                <button data-move="right">▶</button>
+            </div>
+
+        </div>
+
+        <div class="mobile-actions">
+
+            <button id="mobileJump">
+                ↑
+            </button>
+
+            <button id="mobileBreak">
+                ⛏
+            </button>
+
+            <button id="mobilePlace">
+                +
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- MENU -->
+
+    <div id="gameMenu" class="overlay hidden">
+
+        <div class="menu-panel glass">
+
+            <div class="menu-header">
+
+                <h2>NEXUS WORLD</h2>
+
+                <button id="closeMenu">
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="menu-buttons">
+
+                <button data-panel="inventoryPanel">
+                    🎒 المخزون
+                </button>
+
+                <button data-panel="craftPanel">
+                    🛠 التصنيع
+                </button>
+
+                <button data-panel="friendsPanel">
+                    👥 الأصدقاء
+                </button>
+
+                <button data-panel="commandsPanel">
+                    💻 الأوامر
+                </button>
+
+                <button id="logoutGame">
+                    🚪 تسجيل الخروج
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INVENTORY -->
+
+    <div id="inventoryPanel" class="side-panel glass hidden">
+
+        <div class="panel-header">
+
+            <h2>المخزون</h2>
+
+            <button class="close-panel">×</button>
+
+        </div>
+
+        <div id="inventoryGrid"></div>
+
+    </div>
+
+
+    <!-- CRAFTING -->
+
+    <div id="craftPanel" class="side-panel glass hidden">
+
+        <div class="panel-header">
+
+            <h2>التصنيع</h2>
+
+            <button class="close-panel">×</button>
+
+        </div>
+
+
+        <div class="craft-list">
+
+            <button
+                class="craft-item"
+                data-recipe="plank"
+            >
+
+                <div class="craft-icon">
+                    🪵
+                </div>
+
+                <div>
+                    <strong>ألواح خشب</strong>
+                    <small>
+                        1 خشب → 4 ألواح
+                    </small>
+                </div>
+
+                <b>صنع</b>
+
+            </button>
+
+
+            <button
+                class="craft-item"
+                data-recipe="table"
+            >
+
+                <div class="craft-icon">
+                    🪑
+                </div>
+
+                <div>
+                    <strong>طاولة</strong>
+                    <small>
+                        4 ألواح
+                    </small>
+                </div>
+
+                <b>صنع</b>
+
+            </button>
+
+
+            <button
+                class="craft-item"
+                data-recipe="bed"
+            >
+
+                <div class="craft-icon">
+                    🛏️
+                </div>
+
+                <div>
+                    <strong>سرير</strong>
+                    <small>
+                        3 ألواح + 3 ألياف
+                    </small>
+                </div>
+
+                <b>صنع</b>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- FRIENDS -->
+
+    <div id="friendsPanel" class="side-panel glass hidden">
+
+        <div class="panel-header">
+
+            <h2>الأصدقاء</h2>
+
+            <button class="close-panel">
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="friend-search">
+
+            <input
+                id="friendSearch"
+                placeholder="Username أو Player ID"
+            >
+
+            <button id="searchFriend">
+                بحث
+            </button>
+
+        </div>
+
+
+        <div id="friendSearchResult"></div>
+
+
+        <h3>
+            طلبات الصداقة
+        </h3>
+
+        <div id="friendRequests">
+            لا توجد طلبات.
+        </div>
+
+
+        <h3>
+            أصدقائي
+        </h3>
+
+        <div id="friendsList">
+            لا يوجد أصدقاء بعد.
+        </div>
+
+    </div>
+
+
+    <!-- COMMANDS -->
+
+    <div id="commandsPanel" class="side-panel glass hidden">
+
+        <div class="panel-header">
+
+            <h2>Console</h2>
+
+            <button class="close-panel">
+                ×
+            </button>
+
+        </div>
+
+        <div id="commandOutput"></div>
+
+        <div class="command-input">
+
+            <input
+                id="commandInput"
+                placeholder="/help"
+            >
+
+            <button id="sendCommand">
+                تنفيذ
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- NOTIFICATIONS -->
+
+    <div id="notifications"></div>
+
+</div>
 
 
 <script type="module" src="script.js"></script>
