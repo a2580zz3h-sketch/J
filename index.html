@@ -1,554 +1,72 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-
-    <title>NEXUS WORLD</title>
-
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>عيد ميلاد عمر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+<div class="stage">
+  <div class="dots">
+    <div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div><div class="dot" id="d5"></div>
+  </div>
 
-<!-- =========================================================
-     LOADING
-========================================================= -->
-
-<div id="loadingScreen" class="screen loading-screen">
-
-    <div class="loading-logo">
-        <span>NEXUS</span>
-        <b>WORLD</b>
+  <div class="step active" data-step="1">
+    <h1>فيه حاجة مستنياك يا عمر</h1>
+    <p class="sub">قبل ما توصل للمفاجأة، لازم تعدّي ٣ اختبارات صغيرة. ابدأ بالشمعة دي.</p>
+    <div class="candle-wrap">
+      <div class="candle" id="candle1"><div class="body"></div><div class="flame" id="flame1"></div></div>
     </div>
+    <div class="counter" id="count">0 / 12</div>
+    <div class="hint">دوس على الشمعة ١٢ مرة عشان تولّعها</div>
+    <button class="action" id="btn1" disabled>كمّل</button>
+  </div>
 
-    <div class="loading-bar">
-        <div id="loadingProgress"></div>
+  <div class="step" data-step="2">
+    <h1>ذاكرة عمر</h1>
+    <p class="sub">هنولّع الأشكال بترتيب معين، إحفظه واضغط عليها بنفس الترتيب.</p>
+    <div class="grid" id="grid">
+      <div class="tile" data-shape="circle"><div class="shape"></div></div>
+      <div class="tile" data-shape="square"><div class="shape"></div></div>
+      <div class="tile" data-shape="triangle"><div class="shape"></div></div>
+      <div class="tile" data-shape="diamond"><div class="shape"></div></div>
     </div>
+    <div class="hint" id="memHint">استنى الترتيب هيتولّع دلوقتي...</div>
+    <div class="error" id="memErr"></div>
+  </div>
 
-    <div id="loadingText">
-        جاري تشغيل العالم...
+  <div class="step" data-step="3">
+    <h1>سؤال أخير</h1>
+    <p class="sub">مين صاحب عيد الميلاد النهارده؟ اكتب اسمه.</p>
+    <input type="text" id="wordInput" placeholder="اكتب هنا">
+    <div class="error" id="wordErr"></div>
+    <button class="action" id="btn3">اتأكد</button>
+  </div>
+
+  <div class="step" data-step="4">
+    <div class="cake" id="cake">
+      <div class="confetti" id="confetti"></div>
+      <div class="fcandles" id="fcandles"></div>
+      <div class="drip"></div>
+      <div class="tier tier2"></div>
+      <div class="tier tier1"></div>
+      <div class="plate"></div>
     </div>
+    <div class="message">احلا عمر يعم<br>كل سنه وانت طيب<br>يمزمزمزمزمزمزمزمز</div>
+    <button class="action" id="btn4">ادخل هنا يمزمز</button>
+  </div>
 
+  <div class="step" data-step="5">
+    <h1>ادخل هنا يمزمز</h1>
+    <video class="final-video" controls autoplay playsinline>
+      <source src="https://imglink.cc/cdn/LImOFrRKGd.mp4" type="video/mp4">
+    </video>
+  </div>
 </div>
 
-
-<!-- =========================================================
-     AUTH
-========================================================= -->
-
-<div id="authScreen" class="screen hidden">
-
-    <div class="auth-card">
-
-        <div class="brand">
-            <div>NEXUS</div>
-            <span>WORLD</span>
-        </div>
-
-        <p class="brand-sub">
-            OPEN WORLD • ONLINE • 3D
-        </p>
-
-
-        <div id="loginPanel">
-
-            <h2>تسجيل الدخول</h2>
-
-            <input
-                id="loginEmail"
-                type="email"
-                placeholder="البريد الإلكتروني"
-            >
-
-            <input
-                id="loginPassword"
-                type="password"
-                placeholder="كلمة المرور"
-            >
-
-            <button id="loginButton" class="main-button">
-                دخول إلى العالم
-            </button>
-
-            <button id="openRegister" class="link-button">
-                إنشاء حساب
-            </button>
-
-        </div>
-
-
-        <div id="registerPanel" class="hidden">
-
-            <h2>حساب جديد</h2>
-
-            <input
-                id="registerEmail"
-                type="email"
-                placeholder="البريد الإلكتروني"
-            >
-
-            <input
-                id="registerPassword"
-                type="password"
-                placeholder="كلمة المرور"
-            >
-
-            <button id="registerButton" class="main-button">
-                إنشاء الحساب
-            </button>
-
-            <button id="openLogin" class="link-button">
-                لدي حساب
-            </button>
-
-        </div>
-
-
-        <div id="authError"></div>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     USERNAME
-========================================================= -->
-
-<div id="usernameScreen" class="screen hidden">
-
-    <div class="auth-card">
-
-        <div class="brand small">
-            NEXUS WORLD
-        </div>
-
-        <h2>اختر اسم شخصيتك</h2>
-
-        <p class="description">
-            سيستخدم اللاعبون هذا الاسم للعثور عليك وإرسال طلبات الصداقة.
-        </p>
-
-        <input
-            id="usernameInput"
-            maxlength="20"
-            placeholder="مثال: LORD"
-        >
-
-        <button
-            id="createUsername"
-            class="main-button"
-        >
-            دخول العالم
-        </button>
-
-        <div id="usernameError"></div>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     GAME
-========================================================= -->
-
-<div id="gameContainer" class="hidden">
-
-    <canvas id="gameCanvas"></canvas>
-
-
-    <!-- TOP HUD -->
-
-    <div class="top-hud">
-
-        <div class="player-hud glass">
-
-            <div class="player-avatar">
-                N
-            </div>
-
-            <div>
-                <strong id="hudUsername">
-                    @PLAYER
-                </strong>
-
-                <small id="hudId">
-                    ID: ------
-                </small>
-            </div>
-
-        </div>
-
-
-        <div class="world-info glass">
-
-            <div id="clockIcon">
-                ☀
-            </div>
-
-            <span id="worldClock">
-                12:00
-            </span>
-        </div>
-
-
-        <button
-            id="menuButton"
-            class="hud-button glass"
-        >
-            ☰
-        </button>
-
-    </div>
-
-
-    <!-- CROSSHAIR -->
-
-    <div id="crosshair">
-        <span></span>
-        <span></span>
-    </div>
-
-
-    <!-- ACTION HINT -->
-
-    <div
-        id="actionHint"
-        class="action-hint hidden"
-    >
-        انقر لكسر العنصر
-    </div>
-
-
-    <!-- HOTBAR -->
-
-    <div id="hotbar">
-
-        <div class="hotbar-slot selected" data-slot="0">
-            <span class="slot-number">1</span>
-            <span class="item-icon">🪵</span>
-            <span class="item-count" id="countWood">0</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="1">
-            <span class="slot-number">2</span>
-            <span class="item-icon">🪨</span>
-            <span class="item-count" id="countStone">0</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="2">
-            <span class="slot-number">3</span>
-            <span class="item-icon">🧱</span>
-            <span class="item-count" id="countDirt">0</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="3">
-            <span class="slot-number">4</span>
-            <span class="item-icon">🪵</span>
-            <span class="item-count" id="countPlank">0</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="4">
-            <span class="slot-number">5</span>
-            <span class="item-icon">🌱</span>
-            <span class="item-count">∞</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="5">
-            <span class="slot-number">6</span>
-            <span class="item-icon">🪑</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="6">
-            <span class="slot-number">7</span>
-            <span class="item-icon">🛏️</span>
-        </div>
-
-        <div class="hotbar-slot" data-slot="7">
-            <span class="slot-number">8</span>
-            <span class="item-icon">🧰</span>
-        </div>
-
-    </div>
-
-
-    <!-- MOBILE CONTROLS -->
-
-    <div id="mobileControls">
-
-        <div class="movement-pad">
-
-            <button data-move="forward">▲</button>
-
-            <div>
-                <button data-move="left">◀</button>
-                <button data-move="back">▼</button>
-                <button data-move="right">▶</button>
-            </div>
-
-        </div>
-
-        <div class="mobile-actions">
-
-            <button id="mobileJump">
-                ↑
-            </button>
-
-            <button id="mobileBreak">
-                ⛏
-            </button>
-
-            <button id="mobilePlace">
-                +
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- MENU -->
-
-    <div id="gameMenu" class="overlay hidden">
-
-        <div class="menu-panel glass">
-
-            <div class="menu-header">
-
-                <h2>NEXUS WORLD</h2>
-
-                <button id="closeMenu">
-                    ×
-                </button>
-
-            </div>
-
-
-            <div class="menu-buttons">
-
-                <button data-panel="inventoryPanel">
-                    🎒 المخزون
-                </button>
-
-                <button data-panel="craftPanel">
-                    🛠 التصنيع
-                </button>
-
-                <button data-panel="friendsPanel">
-                    👥 الأصدقاء
-                </button>
-
-                <button data-panel="commandsPanel">
-                    💻 الأوامر
-                </button>
-
-                <button id="logoutGame">
-                    🚪 تسجيل الخروج
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- INVENTORY -->
-
-    <div id="inventoryPanel" class="side-panel glass hidden">
-
-        <div class="panel-header">
-
-            <h2>المخزون</h2>
-
-            <button class="close-panel">×</button>
-
-        </div>
-
-        <div id="inventoryGrid"></div>
-
-    </div>
-
-
-    <!-- CRAFTING -->
-
-    <div id="craftPanel" class="side-panel glass hidden">
-
-        <div class="panel-header">
-
-            <h2>التصنيع</h2>
-
-            <button class="close-panel">×</button>
-
-        </div>
-
-
-        <div class="craft-list">
-
-            <button
-                class="craft-item"
-                data-recipe="plank"
-            >
-
-                <div class="craft-icon">
-                    🪵
-                </div>
-
-                <div>
-                    <strong>ألواح خشب</strong>
-                    <small>
-                        1 خشب → 4 ألواح
-                    </small>
-                </div>
-
-                <b>صنع</b>
-
-            </button>
-
-
-            <button
-                class="craft-item"
-                data-recipe="table"
-            >
-
-                <div class="craft-icon">
-                    🪑
-                </div>
-
-                <div>
-                    <strong>طاولة</strong>
-                    <small>
-                        4 ألواح
-                    </small>
-                </div>
-
-                <b>صنع</b>
-
-            </button>
-
-
-            <button
-                class="craft-item"
-                data-recipe="bed"
-            >
-
-                <div class="craft-icon">
-                    🛏️
-                </div>
-
-                <div>
-                    <strong>سرير</strong>
-                    <small>
-                        3 ألواح + 3 ألياف
-                    </small>
-                </div>
-
-                <b>صنع</b>
-
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- FRIENDS -->
-
-    <div id="friendsPanel" class="side-panel glass hidden">
-
-        <div class="panel-header">
-
-            <h2>الأصدقاء</h2>
-
-            <button class="close-panel">
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="friend-search">
-
-            <input
-                id="friendSearch"
-                placeholder="Username أو Player ID"
-            >
-
-            <button id="searchFriend">
-                بحث
-            </button>
-
-        </div>
-
-
-        <div id="friendSearchResult"></div>
-
-
-        <h3>
-            طلبات الصداقة
-        </h3>
-
-        <div id="friendRequests">
-            لا توجد طلبات.
-        </div>
-
-
-        <h3>
-            أصدقائي
-        </h3>
-
-        <div id="friendsList">
-            لا يوجد أصدقاء بعد.
-        </div>
-
-    </div>
-
-
-    <!-- COMMANDS -->
-
-    <div id="commandsPanel" class="side-panel glass hidden">
-
-        <div class="panel-header">
-
-            <h2>Console</h2>
-
-            <button class="close-panel">
-                ×
-            </button>
-
-        </div>
-
-        <div id="commandOutput"></div>
-
-        <div class="command-input">
-
-            <input
-                id="commandInput"
-                placeholder="/help"
-            >
-
-            <button id="sendCommand">
-                تنفيذ
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- NOTIFICATIONS -->
-
-    <div id="notifications"></div>
-
-</div>
-
-
-<script type="module" src="script.js"></script>
-
+<script src="script.js"></script>
 </body>
 </html>
