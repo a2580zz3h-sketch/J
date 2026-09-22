@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>كل سنة وانت طيب يا عمر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage">
+  <div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div>
+  <div class="cake" id="cake">
+    <div class="confetti" id="confetti"></div>
+    <div class="fcandles" id="fcandles"></div>
+    <div class="drip"></div>
+    <div class="tier tier2"></div>
+    <div class="tier tier1"></div>
+    <div class="plate"></div>
+  </div>
+  <div class="message">احلا عمر يعم<br>كل سنه وانت طيب<br>يمزمزمزمزمزمزمزمز</div>
+  <a class="action" id="btn4" href="yamazmaz.html">ادخل هنا يمزمز</a>
+</div>
+<script>
+const fc=document.getElementById('fcandles');
+for(let i=0;i<5;i++){
+  fc.innerHTML+='<div class="candle"><div class="body"></div><div class="flame lit" style="animation-delay:'+(i*0.13)+'s"></div></div>';
+}
+const conf=document.getElementById('confetti');
+const colors=['#f4b740','#ff6f59','#f6f1e7','#8fd3c7'];
+const shapes=['circle','square','triangle'];
+for(let i=0;i<40;i++){
+  const s=document.createElement('span');
+  const shape=shapes[Math.floor(Math.random()*shapes.length)];
+  const c=colors[Math.floor(Math.random()*colors.length)];
+  let style='left:'+(Math.random()*100)+'%; animation-delay:'+(Math.random()*0.8)+'s; animation-duration:'+(1.8+Math.random()*1.4)+'s;';
+  if(shape==='circle') style+='width:8px;height:8px;border-radius:50%;background:'+c+';';
+  else if(shape==='square') style+='width:8px;height:8px;background:'+c+';';
+  else style+='width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid '+c+';';
+  s.style.cssText=style;
+  conf.appendChild(s);
+}
+</script>
+</body>
+</html>

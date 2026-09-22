@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سؤال أخير</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage">
+  <div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div>
+  <h1>سؤال أخير</h1>
+  <p class="sub">مين صاحب عيد الميلاد النهارده؟ اكتب اسمه.</p>
+  <input type="text" id="wordInput" placeholder="اكتب هنا">
+  <div class="error" id="wordErr"></div>
+  <button class="action" id="btn3">اتأكد</button>
+</div>
+<script>
+document.getElementById('btn3').addEventListener('click',()=>{
+  const v=document.getElementById('wordInput').value.trim();
+  if(v.includes('عمر')){ window.location.href='cake.html'; }
+  else{ document.getElementById('wordErr').textContent='لأ، فكر تاني :)'; }
+});
+document.getElementById('wordInput').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('btn3').click(); });
+</script>
+</body>
+</html>

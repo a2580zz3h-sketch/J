@@ -10,63 +10,25 @@
 </head>
 <body>
 <div class="stage">
-  <div class="dots">
-    <div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div><div class="dot" id="d5"></div>
+  <div class="dots"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <h1>فيه حاجة مستنياك يا عمر</h1>
+  <p class="sub">قبل ما توصل للمفاجأة، لازم تعدّي ٣ اختبارات صغيرة. ابدأ بالشمعة دي.</p>
+  <div class="candle-wrap">
+    <div class="candle" id="candle1"><div class="body"></div><div class="flame" id="flame1"></div></div>
   </div>
-
-  <div class="step active" data-step="1">
-    <h1>فيه حاجة مستنياك يا عمر</h1>
-    <p class="sub">قبل ما توصل للمفاجأة، لازم تعدّي ٣ اختبارات صغيرة. ابدأ بالشمعة دي.</p>
-    <div class="candle-wrap">
-      <div class="candle" id="candle1"><div class="body"></div><div class="flame" id="flame1"></div></div>
-    </div>
-    <div class="counter" id="count">0 / 12</div>
-    <div class="hint">دوس على الشمعة ١٢ مرة عشان تولّعها</div>
-    <button class="action" id="btn1" disabled>كمّل</button>
-  </div>
-
-  <div class="step" data-step="2">
-    <h1>ذاكرة عمر</h1>
-    <p class="sub">هنولّع الأشكال بترتيب معين، إحفظه واضغط عليها بنفس الترتيب.</p>
-    <div class="grid" id="grid">
-      <div class="tile" data-shape="circle"><div class="shape"></div></div>
-      <div class="tile" data-shape="square"><div class="shape"></div></div>
-      <div class="tile" data-shape="triangle"><div class="shape"></div></div>
-      <div class="tile" data-shape="diamond"><div class="shape"></div></div>
-    </div>
-    <div class="hint" id="memHint">استنى الترتيب هيتولّع دلوقتي...</div>
-    <div class="error" id="memErr"></div>
-  </div>
-
-  <div class="step" data-step="3">
-    <h1>سؤال أخير</h1>
-    <p class="sub">مين صاحب عيد الميلاد النهارده؟ اكتب اسمه.</p>
-    <input type="text" id="wordInput" placeholder="اكتب هنا">
-    <div class="error" id="wordErr"></div>
-    <button class="action" id="btn3">اتأكد</button>
-  </div>
-
-  <div class="step" data-step="4">
-    <div class="cake" id="cake">
-      <div class="confetti" id="confetti"></div>
-      <div class="fcandles" id="fcandles"></div>
-      <div class="drip"></div>
-      <div class="tier tier2"></div>
-      <div class="tier tier1"></div>
-      <div class="plate"></div>
-    </div>
-    <div class="message">احلا عمر يعم<br>كل سنه وانت طيب<br>يمزمزمزمزمزمزمزمز</div>
-    <button class="action" id="btn4">ادخل هنا يمزمز</button>
-  </div>
-
-  <div class="step" data-step="5">
-    <h1>ادخل هنا يمزمز</h1>
-    <video class="final-video" controls autoplay playsinline>
-      <source src="https://imglink.cc/cdn/LImOFrRKGd.mp4" type="video/mp4">
-    </video>
-  </div>
+  <div class="counter" id="count">0 / 12</div>
+  <div class="hint">دوس على الشمعة ١٢ مرة عشان تولّعها</div>
+  <a class="action disabled" id="btn1" href="memory.html">كمّل</a>
 </div>
-
-<script src="script.js"></script>
+<script>
+let clicks=0; const need=12;
+const candle1=document.getElementById('candle1'), flame1=document.getElementById('flame1'), count=document.getElementById('count'), btn1=document.getElementById('btn1');
+candle1.addEventListener('click',()=>{
+  if(clicks>=need) return;
+  clicks++;
+  count.textContent=clicks+' / '+need;
+  if(clicks===need){ flame1.classList.add('lit'); btn1.classList.remove('disabled'); }
+});
+</script>
 </body>
 </html>

@@ -51,12 +51,13 @@ input[type=text]{width:100%; padding:14px 16px; border-radius:10px; border:1px s
   background:var(--bg2); color:var(--cream); font-family:'Cairo',sans-serif; font-size:1rem; text-align:center; outline:none; margin-bottom:14px}
 input[type=text]:focus{border-color:var(--gold)}
 
-button.action{
-  background:var(--coral); color:#fff; border:none; padding:13px 30px; border-radius:10px;
+.action{
+  display:inline-block; background:var(--coral); color:#fff; border:none; padding:13px 30px; border-radius:10px;
   font-family:'Cairo',sans-serif; font-weight:600; font-size:.98rem; cursor:pointer; transition:.2s;
+  text-decoration:none;
 }
-button.action:hover{transform:translateY(-2px)}
-button.action:disabled{opacity:.35; cursor:default; transform:none}
+.action:hover{transform:translateY(-2px)}
+.action:disabled,.action.disabled{opacity:.35; cursor:default; pointer-events:none; transform:none}
 .error{color:var(--coral); font-size:.85rem; height:18px; margin-top:-6px; margin-bottom:10px}
 
 /* final scene */
